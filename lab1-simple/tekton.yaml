@@ -46,7 +46,7 @@ metadata:
 spec:
   steps:
   - args:
-    - 01 version
+    - 02 version
     command:
     - echo
     image: ubuntu
