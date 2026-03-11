@@ -44,6 +44,9 @@ spec:
             persistentVolumeClaim:
               claimName: pipelinerun-$(uid)-pvc
 
+# -------------------------------
+# Pipeline: pipeline-workspace
+# -------------------------------
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
@@ -51,29 +54,34 @@ metadata:
   name: pipeline-workspace
 spec:
   workspaces:
-  - name: pipeline-workspace
+    - name: pipeline-workspace
   tasks:
+    # New task to show workspace path and contents
     - name: show-git
-    workspaces:
-    - name: task-workspace
-      workspace: pipeline-workspace
-    taskRef:
-      name: show-git-location
+      workspaces:
+        - name: task-workspace
+          workspace: pipeline-workspace
+      taskRef:
+        name: show-git-location
+
+    # Existing tasks now run after 'show-git'
     - name: task1
       workspaces:
-      - name: task-workspace
-        workspace: pipeline-workspace          
+        - name: task-workspace
+          workspace: pipeline-workspace
       taskRef:
         name: task-workspace
+      runAfter:
+        - show-git
+
     - name: task2
       workspaces:
-      - name: task-workspace
-        workspace: pipeline-workspace          
+        - name: task-workspace
+          workspace: pipeline-workspace
       taskRef:
         name: task-workspace
       runAfter:
         - task1
-
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
