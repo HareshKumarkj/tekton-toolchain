@@ -53,6 +53,12 @@ spec:
   workspaces:
   - name: pipeline-workspace
   tasks:
+    - name: show-git
+    workspaces:
+    - name: task-workspace
+      workspace: pipeline-workspace
+    taskRef:
+      name: show-git-location
     - name: task1
       workspaces:
       - name: task-workspace
@@ -68,6 +74,34 @@ spec:
       runAfter:
         - task1
 
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: show-git-location
+spec:
+  workspaces:
+  - name: task-workspace
+  steps:
+    - name: show-layout
+      image: ubuntu
+      script: |
+        #!/bin/bash
+        set -x
+
+        echo "=== Workspace Path ==="
+        echo "$(workspaces.task-workspace.path)"
+
+        echo "=== Listing Workspace ==="
+        ls -R "$(workspaces.task-workspace.path)"
+
+        echo "=== Listing /workspace ==="
+        ls -R /workspace || true
+
+        echo "=== Searching for .git directories ==="
+        find / -maxdepth 4 -name ".git" 2>/dev/null || echo "No .git directories found"
+
+        echo "=== Done ==="
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
